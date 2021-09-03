@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<!-- Begin Jekyll SEO tag v2.5.0 -->
+<title>如何在html中播放.flv格式的视频</title>
+  <link rel="icon" href="https://go.choong.net/welcome/favicon.ico" > <!-- Microsoft 徽标 -->
+<!-- IE地址栏前换成自己的图标 -->
+  <link href="favicon.ico" rel="Bookmark">  <!-- 可以在收藏夹中显示出你的图标 -->	
+  </head>
+  
+<!-- <body style="color:#808080;text-decoration:none;">-->
+<body>
+
+Welcome to the flv.js wiki! <br><br>
+
+<li><a href="https://cn.bing.com/search?q=flv+html">flv html - 国内版 Bing</a>:</li>
+
+<h3>1. <a href="https://blog.csdn.net/weixin_45316326/article/details/99053910">如何在html中播放.flv格式的视频【vue和普通html皆可用】_亚卡卡的那年的博客-CSDN博客_html播放flv</a></h3> 
+  <blockquote>
+<h1><a id="_0"></a>前言</h1> 
+<p>之前一直主要做微信小程序方面的内容，视频播放这块一直没怎么在意视频格式的问题，最近开发了一个律所的官网项目，涉及到大量flv格式的视频，让用户转成mp4工作量太大，所以就找了找，如何在html中播放.flv格式的视频。</p> 
+<h1><a id="_2"></a>正文</h1> 
+<p>目前主流浏览器不能直接嵌入并且播放FLV文件，所以直接用video标签播放是行不通的，网上查了一下，发现有两种常用方法：</p> 
+<ol><li><strong>借助一个html标签object,来嵌入一个swf媒体播放文件，并利用该文件来播放你预设的文件。</strong></li><li><strong>利用B站开源的flv.js 通过将FLV文件流转换为ISO BMFF（Fragmented MP4）段，然后<code>&lt;video&gt;</code>通过Media Source Extensions API 将mp4段提供给HTML5 元素。</strong></li></ol> 
+<h2><a id="_6"></a>第一种方法</h2> 
+<p>首先来说一下第一种方法，需要借助一个swf媒体播放文件，网上文章中大多数下载的媒体文件都不能正常工作（坑人啊），所以最后自己找了一个可用的上传到阿里云上，地址： <a href="https://file.njshushuo.com/flvplayer.swf">swf播放器</a><br> .flv格式视频地址 下面代码中示例地址为 https://file.njshushuo.com/8d2164883f65d1f78180b3fcc159d282 。 实际开发时将其替换为自己的地址。附上代码：</p> 
+<pre><code>&lt;object
+    classid="clsid:d27cdb6e-ae6d-11cf-96b8-444553540000"
+    codebase="http://download.macromedia.com/pub/shockwave/cabs/flash/swflash.cab#version=9,0,0,0"
+    width="640"
+    height="480"
+    id="VideoPlayer"
+    align="middle"
+  &gt;
+    &lt;param name="allowScriptAccess" value="*" /&gt;
+    &lt;param name="allowFullScreen" value="true" /&gt;
+    &lt;param
+      name="movie"
+      value="./flvplayer.swf?video=https://file.njshushuo.com/8d2164883f65d1f78180b3fcc159d282&amp;autoplay=true"
+    /&gt;
+    &lt;param name="quality" value="high" /&gt;
+    &lt;param name="bgcolor" value="#ffffff" /&gt;
+    &lt;embed
+      src="./flvplayer.swf"
+      flashvars="vcastr_file=https://file.njshushuo.com/8d2164883f65d1f78180b3fcc159d282" 
+      quality="high"
+      bgcolor="#000000"
+      width="500"
+      height="380"
+      name="VideoPlayer"
+      align="middle"
+      allowScriptAccess="*"
+      allowfullscreen="true"
+      type="application/x-shockwave-flash"
+      pluginspage="http://www.macromedia.com/go/getflashplayer"
+    /&gt;
+  &lt;/object&gt;
+</code></pre> 
+<p>将html打开，果然.flv格式能够播放了，外观也挺不错。<br> <img src="https://img-blog.csdnimg.cn/20190810104449157.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTMxNjMyNg==,size_16,color_FFFFFF,t_70" alt="图片"></p> 
+<p>放入vue项目中，却遇到了一个坑，那就是swf文件不能为相对路径，<strong>需要改成网络绝对路径</strong>，否则加载不到。<br> ok，<strong>大功告成！</strong><br> 然而这种方法主要是利用flash插件完成的，需要浏览器安装flash插件，而对于普通用户而言：</p> 
+<ol><li>安装flash困难</li><li>如果禁用了flash，再次开启也存在一定的困难。</li></ol> 
+<p>另外，flash播放还存在 稳定性 和cpu占用率高的缺点。同时，由于该项目支持移动端，而移动端并没有flash插件，所以只能放弃第一种方法</p> 
+<h2><a id="_52"></a>第二种方法</h2> 
+<p>然后开始研究flv.js, 附上B站flv.js的github地址 https://github.com/Bilibili/flv.js</p> 
+<h3><a id="_55"></a>简介</h3> 
+<p><strong>flv.js</strong>是<em>bilibili</em>网站开源的使用纯JavaScript而不使用Flash编写的HTML5 Flash视频（FLV）播放器。通过将FLV文件流转换为ISO BMFF（Fragmented MP4）段，然后<code>&lt;video&gt;</code>通过Media Source Extensions API 将mp4段提供给HTML5 元素。<br> flv.js用ECMAScript 6编写，由Babel Compiler编译成ECMAScript 5 ，并与Browserify捆绑在一起。</p> 
+<h3><a id="_59"></a>优势</h3> 
+<ul><li>带有H.264 + AAC / MP3编解码器播放的FLV容器</li><li>多部分分段视频播放</li><li>HTTP FLV低延迟直播流播放</li><li>FLV 通过 WebSocket 实时流播放</li><li>兼容Chrome，FireFox，Safari 10，IE11和Edge</li><li>极低的开销，以及浏览器加速的硬件！</li></ul> 
+<h3><a id="_67"></a>附上代码</h3> 
+<pre><code>&lt;script src="flv.min.js"&gt;&lt;/script&gt;
+&lt;video id="videoElement"&gt;&lt;/video&gt;
+&lt;script&gt;
+    if (flvjs.isSupported()) {
+        var videoElement = document.getElementById('videoElement');
+        var flvPlayer = flvjs.createPlayer({
+            type: 'flv',
+            url: 'http://example.com/flv/video.flv'
+        });
+        flvPlayer.attachMediaElement(videoElement);
+        flvPlayer.load();
+        flvPlayer.play();
+    }
+&lt;/script&gt;
+</code></pre> 
+<p>将其放在vue项目中， 通过 <code>npm install flv.js</code>引入 flv.js，创建一个mvideo组件，代码如下：</p> 
+<pre><code>&lt;template&gt;
+  &lt;div class="video"&gt;
+    &lt;video
+      class="video-component"
+      ref="videoElement"
+      controls
+      autoplay
+    &gt;Your browser is too old which doesn't support HTML5 video.&lt;/video&gt;
+  &lt;/div&gt;
+&lt;/template&gt;
+&lt;script&gt;
+import flvjs from "flv.js";
+export default {
+  name: "Video",
+  props: {
+    types: {
+      type: String,
+      default: "flv"
+    },
+    url: {
+      types: String,
+      default: ""
+    }
+  },
+  data() {
+    return {
+      flvPlayer: null
+    };
+  },
+  watch: {
+    url() {
+      if (this.flvPlayer) {
+        this.flvPlayer.detachMediaElement();
+        this.flvPlayer.destroy();
+      }
+      this.createVideo();
+    }
+  },
+  mounted() {
+    this.$nextTick(() =&gt; {
+      this.createVideo();
+    });
+  },
+  methods: {
+    createVideo() {
+      const videoElement = this.$refs.videoElement;
+      this.flvPlayer = flvjs.createPlayer({
+        type: this.types,
+        url: this.url
+      });
+      this.flvPlayer.attachMediaElement(videoElement);
+      this.flvPlayer.load();
+    }
+  }
+};
+&lt;/script&gt;
+</code></pre> 
+<p>使用：<code>&lt;w-video :url="imgUrl + item.videoFileId" :types="item.videoFileType" /&gt;</code></p> 
+<p>flv.js的缺点在于 需要知道该资源的文件类型，在<code>createPlayer</code>时，传入<code>type</code></p> 
+<pre><code>switch (mds.type) {
+	case 'flv':
+    	return new FlvPlayer(mds, optionalConfig);
+	default:
+    	return new NativePlayer(mds, optionalConfig);
+}
+</code></pre> 
+<h1><a id="_156"></a>文末</h1> 
+<p>好了，两种方法都介绍完了，总体而言，第一种方法需要flash插件，稳定性和cpu占用率高，且不支持移动端。第二种方法则需要提前知道视频的格式，具体怎么选择就要根据自己的项目抉择了。</p></blockquote>
+                
+
+</body>
+</html>
